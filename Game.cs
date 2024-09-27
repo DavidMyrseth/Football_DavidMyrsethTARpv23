@@ -1,99 +1,74 @@
-﻿namespace Football;
-
-
+﻿using Football;
 
 public class Game
 {
-    // Домашняя команда (только для чтения, после установки через конструктор)
-    public Team HomeTeam { get; }
+    public Team HomeTeam { get; } // Домашняя команда
+    public Team AwayTeam { get; } // Гостевая команда
+    public Stadium Stadium { get; } // Стадион
+    public Ball Ball { get; private set; } // Мяч
 
-    // Гостевая команда (только для чтения)
-    public Team AwayTeam { get; }
-
-    // Стадион, на котором проходит игра (только для чтения)
-    public Stadium Stadium { get; }
-
-    // Мяч в игре, его можно изменять только через приватные методы этого класса
-    public Ball Ball { get; private set; }
-
-    // Конструктор, который инициализирует игру с домашней и гостевой командами и стадионом
+    // Конструктор для инициализации игры
     public Game(Team homeTeam, Team awayTeam, Stadium stadium)
     {
-        // Инициализация домашней команды.
-        HomeTeam = homeTeam;
-
-        // Связываем домашнюю команду с этой игрой, чтобы она знала, в какой игре участвует
-        homeTeam.Game = this;
-
-        // Инициализация гостевой команды
-        AwayTeam = awayTeam;
-
-        // Связываем гостевую команду с этой игрой
-        awayTeam.Game = this;
-
-        // Устанавливаем стадион для текущей игры
-        Stadium = stadium;
+        HomeTeam = homeTeam; // Устанавливаем домашнюю команду
+        homeTeam.Game = this; // Привязываем игру к домашней команде
+        AwayTeam = awayTeam; // Устанавливаем гостевую команду
+        awayTeam.Game = this; // Привязываем игру к гостевой команде
+        Stadium = stadium; // Устанавливаем стадион
     }
 
-    // Метод для начала игры.
+    // Метод для старта игры
     public void Start()
     {
-        // Инициализируем мяч в центре поля (ширина пополам, высота пополам)
-        Ball = new Ball(Stadium.Width / 2, Stadium.Height / 2, this);
-
-        // Устанавливаем начальные позиции игроков домашней команды на их половине поля
-        HomeTeam.StartGame(Stadium.Width / 2, Stadium.Height);
-
-        // Устанавливаем начальные позиции игроков гостевой команды на их половине поля
-        AwayTeam.StartGame(Stadium.Width / 2, Stadium.Height);
+        Ball = new Ball(Stadium.Width / 2, Stadium.Height / 2, this); // Размещаем мяч в центре поля
+        HomeTeam.StartGame(Stadium.Width / 2, Stadium.Height); // Запускаем игроков домашней команды
+        AwayTeam.StartGame(Stadium.Width / 2, Stadium.Height); // Запускаем игроков гостевой команды
     }
 
-    // Приватный метод для расчета позиции игрока гостевой команды с зеркальной симметрией по полю
+    // Метод для получения позиции для гостей
     private (double, double) GetPositionForAwayTeam(double x, double y)
     {
-        // Зеркально отражаем координаты относительно оси стадиона (по ширине и высоте)
-        return (Stadium.Width - x, Stadium.Height - y);
+        return (Stadium.Width - x, Stadium.Height - y); // Отражаем позицию для гостей
     }
 
-    // Метод для получения позиции игрока с учётом того, за какую команду он играет (домашняя или гостевая)
+    // Метод для получения позиции для команды
     public (double, double) GetPositionForTeam(Team team, double x, double y)
     {
-        // Если это домашняя команда, возвращаем исходные координаты, если гостевая — зеркально отражаем координаты
-        return team == HomeTeam ? (x, y) : GetPositionForAwayTeam(x, y);
+        return team == HomeTeam ? (x, y) : GetPositionForAwayTeam(x, y); // Возвращаем позицию в зависимости от команды
     }
 
-    // Метод для получения позиции мяча относительно команды
+    // Метод для получения позиции мяча для команды
     public (double, double) GetBallPositionForTeam(Team team)
     {
-        // Возвращаем текущую позицию мяча с учётом команды (домашняя или гостевая)
-        return GetPositionForTeam(team, Ball.X, Ball.Y);
+        return GetPositionForTeam(team, Ball.X, Ball.Y); // Возвращаем позицию мяча с учетом команды
     }
 
-    // Метод для установки скорости мяча в зависимости от команды
+    // Метод для установки скорости мяча для команды
     public void SetBallSpeedForTeam(Team team, double vx, double vy)
     {
-        // Если это домашняя команда, устанавливаем заданную скорость мяча
-        if (team == HomeTeam)
+        if (team == HomeTeam) // Если команда домашняя
         {
-            Ball.SetSpeed(vx, vy);
+            Ball.SetSpeed(vx, vy); // Устанавливаем скорость мяча
         }
-        // Если это гостевая команда, инвертируем направление скорости мяча
-        else
+        else // Если команда гостевая
         {
-            Ball.SetSpeed(-vx, -vy);
+            Ball.SetSpeed(-vx, -vy); // Устанавливаем скорость мяча в противоположном направлении
         }
     }
 
-    // Метод для обновления состояний всех объектов игры (игроков и мяча)
+    // Метод для обновления состояний в игре
     public void Move()
     {
-        // Двигаем игроков домашней команды
-        HomeTeam.Move();
+        HomeTeam.Move(); // Двигаем игроков домашней команды
+        AwayTeam.Move(); // Двигаем игроков гостевой команды
+        Ball.Move(); // Двигаем мяч
+    }
 
-        // Двигаем игроков гостевой команды
-        AwayTeam.Move();
-
-        // Двигаем мяч по полю в зависимости от его скорости
-        Ball.Move();
+    // Метод для сброса позиций игроков и мяча после забитого гола
+    public void ResetPositions()
+    {
+        Ball.SetPosition(Stadium.Width / 2, Stadium.Height / 2); // Ставим мяч в центр
+        HomeTeam.StartGame(Stadium.Width / 2, Stadium.Height); // Запускаем игроков домашней команды
+        AwayTeam.StartGame(Stadium.Width / 2, Stadium.Height); // Запускаем игроков гостевой команды
     }
 }

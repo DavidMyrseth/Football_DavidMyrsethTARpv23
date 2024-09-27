@@ -3,101 +3,74 @@ using System.Collections.Generic;
 
 namespace Football;
 
-// Класс Team представляет команду, которая состоит из игроков и участвует в игре.
 public class Team
 {
-    // Список игроков команды, инициализируется пустым списком.
-    public List<Player> Players { get; } = new List<Player>();
+    public List<Player> Players { get; } = new List<Player>(); // Список игроков команды
+    public string Name { get; private set; } // Имя команды
+    public Game Game { get; set; } // Игра, в которой находится команда
 
-    // Название команды, доступно только для чтения (устанавливается в конструкторе).
-    public string Name { get; private set; }
-
-    // Ссылка на игру, в которой участвует команда. Это свойство может быть изменено.
-    public Game Game { get; set; }
-
-    // Конструктор, который инициализирует команду с указанным именем.
+    // Конструктор для создания команды
     public Team(string name)
     {
-        Name = name; // Устанавливаем имя команды.
+        Name = name; // Устанавливаем имя команды
     }
 
-    // Метод, который расставляет игроков команды на случайные позиции внутри заданных границ поля.
+    // Метод для старта игры для команды
     public void StartGame(int width, int height)
     {
-        Random rnd = new Random(); // Создаем генератор случайных чисел.
-
-        // Для каждого игрока в команде задаем случайную позицию.
-        foreach (var player in Players)
+        Random rnd = new Random(); // Создаем генератор случайных чисел
+        foreach (var player in Players) // Для каждого игрока в команде
         {
             player.SetPosition(
-                rnd.NextDouble() * width,  // Случайная позиция по ширине поля.
-                rnd.NextDouble() * height  // Случайная позиция по высоте поля.
+                rnd.NextDouble() * width, // Устанавливаем случайную позицию по оси X
+                rnd.NextDouble() * height // Устанавливаем случайную позицию по оси Y
             );
         }
     }
 
-    // Метод добавления игрока в команду.
+    // Метод для добавления игрока в команду
     public void AddPlayer(Player player)
     {
-        // Если игрок уже состоит в другой команде, мы ничего не делаем.
-        if (player.Team != null) return;
-
-        // Добавляем игрока в команду.
-        Players.Add(player);
-
-        // Устанавливаем ссылку на команду для игрока.
-        player.Team = this;
+        if (player.Team != null) return; // Если игрок уже в команде, ничего не делаем
+        Players.Add(player); // Добавляем игрока в список
+        player.Team = this; // Привязываем игрока к команде
     }
 
-    // Метод получения позиции мяча относительно команды.
+    // Метод для получения позиции мяча для команды
     public (double, double) GetBallPosition()
     {
-        // Получаем позицию мяча для данной команды через игру.
-        return Game.GetBallPositionForTeam(this);
+        return Game.GetBallPositionForTeam(this); // Получаем позицию мяча с учетом команды
     }
 
-    // Метод, который устанавливает скорость мяча относительно команды.
+    // Метод для установки скорости мяча для команды
     public void SetBallSpeed(double vx, double vy)
     {
-        // Устанавливаем скорость мяча через метод игры.
-        Game.SetBallSpeedForTeam(this, vx, vy);
+        Game.SetBallSpeedForTeam(this, vx, vy); // Устанавливаем скорость мяча
     }
 
-    // Метод, который возвращает ближайшего к мячу игрока.
+    // Метод для получения ближайшего игрока к мячу
     public Player GetClosestPlayerToBall()
     {
-        // Инициализируем ближайшего игрока как первого в списке.
-        Player closestPlayer = Players[0];
+        Player closestPlayer = Players[0]; // Начинаем с первого игрока
+        double bestDistance = Double.MaxValue; // Начинаем с бесконечного расстояния
 
-        // Изначально устанавливаем минимальную дистанцию до мяча как максимально возможную.
-        double bestDistance = Double.MaxValue;
-
-        // Проходим по каждому игроку в команде.
-        foreach (var player in Players)
+        foreach (var player in Players) // Для каждого игрока в команде
         {
-            // Вычисляем расстояние от игрока до мяча.
-            var distance = player.GetDistanceToBall();
-
-            // Если это расстояние меньше текущего минимального, обновляем ближайшего игрока.
-            if (distance < bestDistance)
+            var distance = player.GetDistanceToBall(); // Получаем расстояние до мяча
+            if (distance < bestDistance) // Если это ближайший игрок
             {
-                closestPlayer = player;
-                bestDistance = distance;
+                closestPlayer = player; // Обновляем ближайшего игрока
+                bestDistance = distance; // Обновляем лучшее расстояние
             }
         }
 
-        // Возвращаем ближайшего к мячу игрока.
-        return closestPlayer;
+        return closestPlayer; // Возвращаем ближайшего игрока
     }
 
-    // Метод, который двигает всех игроков команды.
+    // Метод для обновления состояний в команде
     public void Move()
     {
-        // Ближайший к мячу игрок двигается в направлении мяча.
-        GetClosestPlayerToBall().MoveTowardsBall();
-
-        // Для каждого игрока выполняем его движение.
-        Players.ForEach(player => player.Move());
+        GetClosestPlayerToBall().MoveTowardsBall(); // Двигаем ближайшего игрока к мячу
+        Players.ForEach(player => player.Move()); // Двигаем всех игроков команды
     }
 }
-

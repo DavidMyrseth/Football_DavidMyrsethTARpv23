@@ -1,28 +1,21 @@
-﻿namespace Football;
-
-// Класс Stadium представляет футбольный стадион с определёнными размерами
-public class Stadium
+﻿public class Stadium
 {
-    // Конструктор, который принимает ширину и высоту стадиона и инициализирует его
+    public int Width { get; }
+    public int Height { get; }
+    public (double, double) HomeGoal { get; }
+    public (double, double) AwayGoal { get; }
+
     public Stadium(int width, int height)
     {
-        // Устанавливаем ширину стадиона
         Width = width;
-
-        // Устанавливаем высоту стадиона
         Height = height;
+        // Define the goals on both sides of the field
+        HomeGoal = (0, height / 2);
+        AwayGoal = (width, height / 2);
     }
 
-    // Свойство для получения ширины стадиона
-    public int Width { get; }
-
-    // Свойство для получения высоты стадиона
-    public int Height { get; }
-
-    // Метод, который проверяет, находится ли точка с координатами (x, y) внутри границ стадиона
     public bool IsIn(double x, double y)
     {
-        // Возвращает true, если x и y находятся внутри границ по ширине и высоте стадиона
-        return x >= 0 && x < Width && y >= 0 && y < Height;
+        return x >= 0 && x <= Width && y >= 0 && y <= Height;
     }
 }
