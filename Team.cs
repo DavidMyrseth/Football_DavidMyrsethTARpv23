@@ -1,76 +1,79 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Football;
-
-public class Team
+﻿namespace Football_DavidMyrsethTARpv23
 {
-    public List<Player> Players { get; } = new List<Player>(); // Список игроков команды
-    public string Name { get; private set; } // Имя команды
-    public Game Game { get; set; } // Игра, в которой находится команда
-
-    // Конструктор для создания команды
-    public Team(string name)
+    public class Team
     {
-        Name = name; // Устанавливаем имя команды
-    }
+        public List<Player> Players { get; } = new List<Player>();
+        public string Name { get; private set; }
+        public Game Game { get; set; }
+        public int Score { get; private set; } = 0;
 
-    // Метод для старта игры для команды
-    public void StartGame(int width, int height)
-    {
-        Random rnd = new Random(); // Создаем генератор случайных чисел
-        foreach (var player in Players) // Для каждого игрока в команде
+
+        public Team(string name)
         {
-            player.SetPosition(
-                rnd.NextDouble() * width, // Устанавливаем случайную позицию по оси X
-                rnd.NextDouble() * height // Устанавливаем случайную позицию по оси Y
-            );
+            Name = name;
         }
-    }
 
-    // Метод для добавления игрока в команду
-    public void AddPlayer(Player player)
-    {
-        if (player.Team != null) return; // Если игрок уже в команде, ничего не делаем
-        Players.Add(player); // Добавляем игрока в список
-        player.Team = this; // Привязываем игрока к команде
-    }
 
-    // Метод для получения позиции мяча для команды
-    public (double, double) GetBallPosition()
-    {
-        return Game.GetBallPositionForTeam(this); // Получаем позицию мяча с учетом команды
-    }
-
-    // Метод для установки скорости мяча для команды
-    public void SetBallSpeed(double vx, double vy)
-    {
-        Game.SetBallSpeedForTeam(this, vx, vy); // Устанавливаем скорость мяча
-    }
-
-    // Метод для получения ближайшего игрока к мячу
-    public Player GetClosestPlayerToBall()
-    {
-        Player closestPlayer = Players[0]; // Начинаем с первого игрока
-        double bestDistance = Double.MaxValue; // Начинаем с бесконечного расстояния
-
-        foreach (var player in Players) // Для каждого игрока в команде
+        public void StartGame(int width, int height)
         {
-            var distance = player.GetDistanceToBall(); // Получаем расстояние до мяча
-            if (distance < bestDistance) // Если это ближайший игрок
+            Random rnd = new Random();
+            foreach (var player in Players)
             {
-                closestPlayer = player; // Обновляем ближайшего игрока
-                bestDistance = distance; // Обновляем лучшее расстояние
+                player.SetPosition(
+                    rnd.Next() * width,
+                    rnd.Next() * height
+                );
             }
         }
 
-        return closestPlayer; // Возвращаем ближайшего игрока
-    }
 
-    // Метод для обновления состояний в команде
-    public void Move()
-    {
-        GetClosestPlayerToBall().MoveTowardsBall(); // Двигаем ближайшего игрока к мячу
-        Players.ForEach(player => player.Move()); // Двигаем всех игроков команды
+        public void AddPlayer(Player player)
+        {
+            if (player.Team != null) return;
+            Players.Add(player);
+            player.Team = this;
+        }
+
+
+        public (double, double) GetBallPosition()
+        {
+            return Game.GetBallPositionForTeam(this);
+        }
+
+
+        public void SetBallSpeed(double vx, double vy)
+        {
+            Game.SetBallSpeedForTeam(this, vx, vy);
+        }
+
+
+        public Player GetClosestPlayerToBall()
+        {
+            Player closestPlayer = Players[0];
+            double bestDistance = Double.MaxValue;
+            foreach (var player in Players)
+            {
+                var distance = player.GetDistanceToBall();
+                if (distance < bestDistance)
+                {
+                    closestPlayer = player;
+                    bestDistance = distance;
+                }
+            }
+
+            return closestPlayer;
+        }
+
+
+        public void Move()
+        {
+            GetClosestPlayerToBall().MoveTowardsBall();
+            Players.ForEach(player => player.Move());
+        }
+
+        public void ScoreGoal()
+        {
+            Score++;
+        }
     }
 }

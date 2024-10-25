@@ -1,100 +1,120 @@
-﻿using System;
-
-namespace Football;
-
-// Класс для представления игрока
-public class Player
+﻿namespace Football_DavidMyrsethTARpv23
 {
-    public string Name { get; } // Имя игрока
-    public double X { get; private set; } // Позиция игрока по оси X
-    public double Y { get; private set; } // Позиция игрока по оси Y
-    private double _vx, _vy; // Скорость игрока по осям X и Y
-    public Team? Team { get; set; } = null; // Команда игрока
-
-    private const double MaxSpeed = 5; // Максимальная скорость игрока
-    private const double MaxKickSpeed = 25; // Максимальная скорость удара по мячу
-    private const double BallKickDistance = 10; // Дистанция для удара по мячу
-
-    private Random _random = new Random(); // Генератор случайных чисел
-
-    // Конструктор для создания игрока с именем
-    public Player(string name)
+    class Program
     {
-        Name = name;
-    }
-
-    // Конструктор для создания игрока с заданной позицией и командой
-    public Player(string name, double x, double y, Team team)
-    {
-        Name = name;
-        X = x;
-        Y = y;
-        Team = team;
-    }
-
-    // Метод для установки позиции игрока
-    public void SetPosition(double x, double y)
-    {
-        X = x; // Устанавливаем позицию по оси X
-        Y = y; // Устанавливаем позицию по оси Y
-    }
-
-    // Метод для получения абсолютной позиции игрока
-    public (double, double) GetAbsolutePosition()
-    {
-        return Team!.Game.GetPositionForTeam(Team, X, Y); // Получаем позицию с учетом команды
-    }
-
-    // Метод для расчета расстояния до мяча
-    public double GetDistanceToBall()
-    {
-        var ballPosition = Team!.GetBallPosition(); // Получаем позицию мяча
-        var dx = ballPosition.Item1 - X; // Разность по оси X
-        var dy = ballPosition.Item2 - Y; // Разность по оси Y
-        return Math.Sqrt(dx * dx + dy * dy); // Возвращаем расстояние до мяча
-    }
-
-    // Метод для движения игрока к мячу
-    public void MoveTowardsBall()
-    {
-        var ballPosition = Team!.GetBallPosition(); // Получаем позицию мяча
-        var dx = ballPosition.Item1 - X; // Разность по оси X
-        var dy = ballPosition.Item2 - Y; // Разность по оси Y
-        var ratio = Math.Sqrt(dx * dx + dy * dy) / MaxSpeed; // Рассчитываем коэффициент
-        _vx = dx / ratio; // Устанавливаем скорость по оси X
-        _vy = dy / ratio; // Устанавливаем скорость по оси Y
-    }
-
-    // Метод для обновления позиции игрока
-    public void Move()
-    {
-        if (Team.GetClosestPlayerToBall() != this) // Если игрок не ближайший к мячу
+        static void Main(string[] args)
         {
-            _vx = 0; // Обнуляем скорость по оси X
-            _vy = 0; // Обнуляем скорость по оси Y
+            Stadium stadium = new Stadium(40, 20); // Увеличиваем размер стадиона
+
+            Team homeTeam = new Team("Home");
+            Team GuestTeam = new Team("Guest");
+
+            for (int i = 0; i < 11; i++)// Добавляем игроков в команды
+            {
+                homeTeam.AddPlayer(new Player($"HomePlayer{i + 1}"));
+                GuestTeam.AddPlayer(new Player($"GuestPlayer{i + 1}"));
+            }
+
+            Game game = new Game(homeTeam, GuestTeam, stadium);
+            game.Start();
+
+            while (true)
+            {
+                game.Move();
+                PrintGameState(game);
+                System.Threading.Thread.Sleep(500); // Задержка для визуализации
+
+                if (Console.KeyAvailable)// Проверка нажатия клавиши для выхода
+                {
+                    var key = Console.ReadKey(true);
+                    if (key.Key == ConsoleKey.Escape) // Выход по нажатию ESC
+                    {
+                        break;
+                    }
+                }
+            }
         }
 
-        if (GetDistanceToBall() < BallKickDistance) // Если игрок находится в пределах удара по мячу
+        static void PrintGameState(Game game)
         {
-            Team.SetBallSpeed(
-                MaxKickSpeed * _random.NextDouble(), // Задаем скорость мяча по оси X
-                MaxKickSpeed * (_random.NextDouble() - 0.5) // Задаем скорость мяча по оси Y
-            );
-        }
+            Console.Clear();
 
-        var newX = X + _vx; // Обновляем позицию по оси X
-        var newY = Y + _vy; // Обновляем позицию по оси Y
-        var newAbsolutePosition = Team.Game.GetPositionForTeam(Team, newX, newY); // Получаем новую абсолютную позицию
+            int width = game.Stadium.Width;
+            int height = game.Stadium.Height;
+            char[,] field = new char[height, width];
 
-        // Проверяем, находится ли новая позиция в пределах стадиона
-        if (Team.Game.Stadium.IsIn(newAbsolutePosition.Item1, newAbsolutePosition.Item2))
-        {
-            X = newX; // Обновляем позицию по оси X
-            Y = newY; // Обновляем позицию по оси Y
-        }
-        else // Если позиция выходит за пределы стадиона
-        {
-            _vx = _vy = 0; // Обнуляем скорость
+            // Fill the field with spaces (invisible background)
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    field[y, x] = ' '; // Empty background
+                }
+            }
+
+            // Add players from the home team
+            for (int i = 0; i < game.HomeTeam.Players.Count; i++)
+            {
+                var player = game.HomeTeam.Players[i];
+                int playerX = (int)player.X;
+                int playerY = (int)player.Y;
+                if (playerX >= 0 && playerX < width && playerY >= 0 && playerY < height)
+                {
+                    // Use a unique character for each home player
+                    field[playerY, playerX] = (char)('H' + i); // Unique character for each home player
+                }
+            }
+
+            // Add players from the guest team
+            for (int i = 0; i < game.GuestTeam.Players.Count; i++)
+            {
+                var player = game.GuestTeam.Players[i];
+                int playerX = (int)player.X;
+                int playerY = (int)player.Y;
+                if (playerX >= 0 && playerX < width && playerY >= 0 && playerY < height)
+                {
+                    // Use a unique character for each guest player
+                    field[playerY, playerX] = (char)('G' + i); // Unique character for each guest player
+                }
+            }
+
+            // Add the ball
+            int ballX = (int)game.Ball.X;
+            int ballY = (int)game.Ball.Y;
+            if (ballX >= 0 && ballX < width && ballY >= 0 && ballY < height)
+            {
+                field[ballY, ballX] = 'O'; // Represent the ball with 'O'
+            }
+
+            // Display extended goals (5 cells wide)
+            for (int i = -2; i <= 2; i++)
+            {
+                if (height / 2 + i >= 0 && height / 2 + i < height)
+                {
+                    field[height / 2 + i, 0] = 'X'; // Goal for the home team
+                    field[height / 2 + i, width - 1] = 'X'; // Goal for the guest team
+                }
+            }
+
+            // Print the score
+            Console.WriteLine($"Score: {game.HomeTeam.Name} {game.HomeTeam.Score} - {game.GuestTeam.Score} {game.GuestTeam.Name}\n");
+
+            // Print the upper boundary of the field
+            Console.WriteLine(new string('#', (width + 2) * 2));
+
+            // Print the playing field with side borders
+            for (int y = 0; y < height; y++)
+            {
+                Console.Write("# "); // Left border
+                for (int x = 0; x < width; x++)
+                {
+                    Console.Write(field[y, x] + " "); // Print field contents
+                }
+                Console.WriteLine("#"); // Right border
+            }
+
+            // Print the lower boundary of the field
+            Console.WriteLine(new string('#', (width + 2) * 2));
         }
     }
 }

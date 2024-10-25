@@ -1,45 +1,66 @@
 ﻿using System;
 
-public class Ball
+namespace Football_DavidMyrsethTARpv23
 {
-    public double X { get; private set; } // Позиция мяча по оси X
-    public double Y { get; private set; } // Позиция мяча по оси Y
-
-    private double _vx, _vy; // Скорость мяча по осям X и Y
-
-    private Game _game; // Игра, в которой находится мяч
-
-
-// Конструктор для инициализации мяча
-public Ball(double x, double y, Game game)
+    public class Ball
     {
-        _game = game; // Привязываем игру к мячу
-        X = x; // Устанавливаем позицию мяча по оси X
-        Y = y; // Устанавливаем позицию мяча по оси Y
-    }
+        public double X { get; private set; }
+        public double Y { get; private set; }
 
-    // Метод для установки скорости мяча
-    public void SetSpeed(double vx, double vy)
-    {
-        _vx = vx; // Устанавливаем скорость мяча по оси X
-        _vy = vy; // Устанавливаем скорость мяча по оси Y
-    }
+        private double _vx, _vy;
 
-    // Метод для обновления позиции мяча
-    public void Move()
-    {
-        double newX = X + _vx; // Вычисляем новую позицию по оси X
-        double newY = Y + _vy; // Вычисляем новую позицию по оси Y
+        private Game _game;
 
-        // Проверяем, находится ли новая позиция мяча в пределах стадиона
-        if (_game.Stadium.IsIn(newX, newY))
+
+
+        public Ball(double x, double y, Game game)
         {
-            X = newX; // Обновляем позицию мяча по оси X
-            Y = newY; // Обновляем позицию мяча по оси Y
+            _game = game;
+            X = x;
+            Y = y;
         }
-        else // Если позиция мяча выходит за пределы стадиона
+
+        public void SetPosition(double x, double y)
         {
-            _vx = 0; // Обнуляем скорость мяча по оси X
-            _vy = 0; // Обнуляем скорость мяча по оси Y
+            X = x;
+            Y = y;
+        }
+
+
+        public void SetSpeed(double vx, double vy)
+        {
+            _vx = vx;
+            _vy = vy;
+        }
+
+
+        public void Move()
+        {
+            double newX = X + _vx;
+            double newY = Y + _vy;
+
+            if (_game.Stadium.IsIn(newX, newY))//проверка на столкновение с стеной
+            {
+                X = newX;
+                Y = newY;
+            }
+            else
+            {
+
+                if (newX < 0 || newX >= _game.Stadium.Width)//рикошет от стены
+                {
+                    _vx = -_vx; //смена направление по оси X
+                    newX = X + _vx; //перемещение мяч на 1 пиксель
+                    X = newX < 0 ? 1 : newX >= _game.Stadium.Width ? _game.Stadium.Width - 1 : newX;
+                }
+
+                if (newY < 0 || newY >= _game.Stadium.Height)
+                {
+                    _vy = -_vy; //сменна направление по оси Y
+                    newY = Y + _vy; //перимещаем мяч на 1 пиксель
+                    Y = newY < 0 ? 1 : newY >= _game.Stadium.Height ? _game.Stadium.Height - 1 : newY;
+                }
+            }
         }
     }
+}
