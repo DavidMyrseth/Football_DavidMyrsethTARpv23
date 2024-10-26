@@ -6,23 +6,28 @@
         {
             Stadium stadium = new Stadium(40, 20); // Увеличиваем размер стадиона
 
+
             Team homeTeam = new Team("Home");
-            Team GuestTeam = new Team("Guest");
+            Team awayTeam = new Team("Away");
+
 
             for (int i = 0; i < 11; i++)// Добавляем игроков в команды
             {
                 homeTeam.AddPlayer(new Player($"HomePlayer{i + 1}"));
-                GuestTeam.AddPlayer(new Player($"GuestPlayer{i + 1}"));
+                awayTeam.AddPlayer(new Player($"AwayPlayer{i + 1}"));
             }
 
-            Game game = new Game(homeTeam, GuestTeam, stadium);
+
+            Game game = new Game(homeTeam, awayTeam, stadium);
             game.Start();
 
-            while (true)
+
+            while (true)// Бесконечный игровой цикл
             {
                 game.Move();
-                PrintGameState(game);
+                PrintGameState(game, stadium);
                 System.Threading.Thread.Sleep(500); // Задержка для визуализации
+
 
                 if (Console.KeyAvailable)// Проверка нажатия клавиши для выхода
                 {
@@ -35,7 +40,7 @@
             }
         }
 
-        static void PrintGameState(Game game)
+        static void PrintGameState(Game game, Stadium stadium)
         {
             Console.Clear();
 
@@ -43,78 +48,72 @@
             int height = game.Stadium.Height;
             char[,] field = new char[height, width];
 
-            // Fill the field with spaces (invisible background)
+            // Создаем пустое поле
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    field[y, x] = ' '; // Empty background
+                    field[y, x] = ' '; // Пустое пространство
                 }
             }
 
-            // Add players from the home team
-            for (int i = 0; i < game.HomeTeam.Players.Count; i++)
+            // Размещаем игроков домашней команды
+            foreach (var player in game.HomeTeam.Players)
             {
-                var player = game.HomeTeam.Players[i];
                 int playerX = (int)player.X;
                 int playerY = (int)player.Y;
-                if (playerX >= 0 && playerX < width && playerY >= 0 && playerY < height)
+                if (stadium.IsIn(playerX, playerY)) // нужен для того чтобы игрок не выходил из поля
                 {
-                    // Use a unique character for each home player
-                    field[playerY, playerX] = (char)('H' + i); // Unique character for each home player
+                    field[playerY, playerX] = 'H'; // задают символ где находится игрок
                 }
             }
 
-            // Add players from the guest team
-            for (int i = 0; i < game.GuestTeam.Players.Count; i++)
+            // Размещаем игроков выездной команды
+            foreach (var player in game.AwayTeam.Players)
             {
-                var player = game.GuestTeam.Players[i];
                 int playerX = (int)player.X;
                 int playerY = (int)player.Y;
-                if (playerX >= 0 && playerX < width && playerY >= 0 && playerY < height)
+                if (stadium.IsIn(playerX, playerY))
                 {
-                    // Use a unique character for each guest player
-                    field[playerY, playerX] = (char)('G' + i); // Unique character for each guest player
+                    field[playerY, playerX] = 'A';
                 }
             }
 
-            // Add the ball
+            // Размещаем мяч
             int ballX = (int)game.Ball.X;
             int ballY = (int)game.Ball.Y;
-            if (ballX >= 0 && ballX < width && ballY >= 0 && ballY < height)
+            if (stadium.IsIn(ballX, ballY)) 
             {
-                field[ballY, ballX] = 'O'; // Represent the ball with 'O'
+                field[ballY, ballX] = 'O';
             }
 
-            // Display extended goals (5 cells wide)
-            for (int i = -2; i <= 2; i++)
+
+            // Отображаем ворота
+            for(int x = 0; x < 8; x++) // пока x меньше 8, он будет работать
             {
-                if (height / 2 + i >= 0 && height / 2 + i < height)
-                {
-                    field[height / 2 + i, 0] = 'X'; // Goal for the home team
-                    field[height / 2 + i, width - 1] = 'X'; // Goal for the guest team
-                }
+                field[height / 2 + 3 - x, 0] = 'X'; // Ворота домашней команды
+                field[height / 2 + 3 - x, width - 1] = 'X'; // Ворота выездной команды
             }
 
-            // Print the score
-            Console.WriteLine($"Score: {game.HomeTeam.Name} {game.HomeTeam.Score} - {game.GuestTeam.Score} {game.GuestTeam.Name}\n");
 
-            // Print the upper boundary of the field
-            Console.WriteLine(new string('#', (width + 2) * 2));
+            // Выводим счёт
+            Console.WriteLine($"{new string (' ', (int)((float)width /  1.5f))}Score: {game.HomeTeam.Name} {game.HomeTeam.Score} - {game.AwayTeam.Score} {game.AwayTeam.Name}\n");
+            // Преобразование флота в int
 
-            // Print the playing field with side borders
+            // Выводим поле с рамкой
+            Console.WriteLine(new string('#', width * 2 + 3)); // Верхняя рамка
+
             for (int y = 0; y < height; y++)
             {
-                Console.Write("# "); // Left border
+                Console.Write("# "); // Левая рамка
                 for (int x = 0; x < width; x++)
                 {
-                    Console.Write(field[y, x] + " "); // Print field contents
+                    Console.Write(field[y, x] + " ");
                 }
-                Console.WriteLine("#"); // Right border
+                Console.WriteLine("#"); // Правая рамка
             }
 
-            // Print the lower boundary of the field
-            Console.WriteLine(new string('#', (width + 2) * 2));
+            Console.WriteLine(new string('#', width * 2 + 3)); // Нижняя рамка
         }
     }
 }

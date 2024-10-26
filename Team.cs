@@ -20,8 +20,8 @@
             foreach (var player in Players)
             {
                 player.SetPosition(
-                    rnd.Next() * width,
-                    rnd.Next() * height
+                    (int)( rnd.NextDouble() * width),
+                    (int)( rnd.NextDouble() * height)
                 );
             }
         }
@@ -29,13 +29,13 @@
 
         public void AddPlayer(Player player)
         {
-            if (player.Team != null) return;
+            if (player.Team != null) return; // если у игрока нет команды, то не добавляю игрока
             Players.Add(player);
             player.Team = this;
         }
 
 
-        public (double, double) GetBallPosition()
+        public (int, int) GetBallPosition()
         {
             return Game.GetBallPositionForTeam(this);
         }
@@ -50,7 +50,7 @@
         public Player GetClosestPlayerToBall()
         {
             Player closestPlayer = Players[0];
-            double bestDistance = Double.MaxValue;
+            int bestDistance = int.MaxValue;
             foreach (var player in Players)
             {
                 var distance = player.GetDistanceToBall();

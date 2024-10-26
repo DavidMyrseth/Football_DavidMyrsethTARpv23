@@ -3,17 +3,16 @@
     public class Game
     {
         public Team HomeTeam { get; }
-        public Team GuestTeam { get; }
+        public Team AwayTeam { get; }
         public Stadium Stadium { get; }
         public Ball Ball { get; private set; }
 
-
-        public Game(Team homeTeam, Team guestTeam, Stadium stadium)
+        public Game(Team homeTeam, Team awayTeam, Stadium stadium)
         {
             HomeTeam = homeTeam;
             homeTeam.Game = this;
-            GuestTeam = guestTeam;
-            guestTeam.Game = this;
+            AwayTeam = awayTeam;
+            awayTeam.Game = this;
             Stadium = stadium;
         }
 
@@ -22,23 +21,23 @@
         {
             Ball = new Ball(Stadium.Width / 2, Stadium.Height / 2, this);
             HomeTeam.StartGame(Stadium.Width / 2, Stadium.Height);
-            GuestTeam.StartGame(Stadium.Width / 2, Stadium.Height);
+            AwayTeam.StartGame(Stadium.Width / 2, Stadium.Height);
         }
 
 
-        private (double, double) GetPositionForAwayTeam(double x, double y)
+        private (int, int) GetPositionForAwayTeam(int x, int y)
         {
             return (Stadium.Width - x, Stadium.Height - y);
         }
 
 
-        public (double, double) GetPositionForTeam(Team team, double x, double y)
+        public (int, int) GetPositionForTeam(Team team, int x, int y)
         {
             return team == HomeTeam ? (x, y) : GetPositionForAwayTeam(x, y);
         }
 
 
-        public (double, double) GetBallPositionForTeam(Team team)
+        public (int, int) GetBallPositionForTeam(Team team)
         {
             return GetPositionForTeam(team, Ball.X, Ball.Y);
         }
@@ -60,27 +59,25 @@
         public void Move()
         {
             HomeTeam.Move();
-            GuestTeam.Move();
+            AwayTeam.Move();
             Ball.Move();
             CheckGoal();
         }
+
         private void CheckGoal()
         {
-            // Проверка на голы
-            if (Ball.X <= 0) // Мяч попал в ворота домашней команды
+            //проверка на голы
+            if (Ball.X <= 0) //мяч попал в ворота домашней
             {
-                GuestTeam.ScoreGoal(); // Увеличиваем счет для Guest
-                Console.WriteLine("Guest забил гол!"); // Логирование
+                AwayTeam.ScoreGoal();
                 ResetBall();
             }
-            else if (Ball.X >= Stadium.Width - 1) // Мяч попал в ворота выездной команды
+            else if (Ball.X >= Stadium.Width - 1) //мяч попал в ворота выездной
             {
-                HomeTeam.ScoreGoal(); // Увеличиваем счет для Home
-                Console.WriteLine("Home забил гол!"); // Логирование
+                HomeTeam.ScoreGoal();
                 ResetBall();
             }
         }
-
 
         private void ResetBall()
         {
