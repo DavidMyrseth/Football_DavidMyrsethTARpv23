@@ -59,6 +59,7 @@
         // Метод для движения игрока к мячу
         public void MoveTowardsBall()
         {
+
             var ballPosition = Team!.GetBallPosition();
             var dx = ballPosition.Item1 - X;
             var dy = ballPosition.Item2 - Y;
@@ -79,7 +80,9 @@
                 _vx = 0;
                 _vy = 0;
             }
-            // близко к мячу, он выполняет удар по мячу
+
+
+            // Близко к мячу, он выполняет удар по мячу
             if (GetDistanceToBall() < BallKickDistance)
             {
                 Team.SetBallSpeed(

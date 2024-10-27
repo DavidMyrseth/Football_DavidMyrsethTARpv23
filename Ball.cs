@@ -22,6 +22,7 @@
             X = x;
             Y = y;
         }
+          
         // скорости мяча по осям X и Y
         public void SetSpeed(double vx, double vy)
         {
@@ -35,7 +36,7 @@
             int newX = X + (int)_vx;
             int newY = Y + (int)_vy;
 
-            //проверка остается ли мяч в пределах стадиона
+            // Проверка остается ли мяч в пределах стадиона
             if (_game.Stadium.IsIn(newX, newY))
             {
                 X = newX;

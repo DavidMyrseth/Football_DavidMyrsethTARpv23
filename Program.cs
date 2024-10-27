@@ -5,7 +5,6 @@
         // Размер стадиона
         static void Main(string[] args)
         {
-
             Stadium stadium = new Stadium(40, 20); 
 
             Team homeTeam = new Team("Home");
@@ -45,6 +44,7 @@
                 }
             }
         }
+
         // Вывод текущего состояния игры
         static void PrintGameState(Game game, Stadium stadium)
         {
