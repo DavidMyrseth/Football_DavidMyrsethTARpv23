@@ -2,58 +2,66 @@
 {
     class Program
     {
+        // Размер стадиона
         static void Main(string[] args)
         {
-            Stadium stadium = new Stadium(40, 20); // Увеличиваем размер стадиона
 
+            Stadium stadium = new Stadium(40, 20); 
 
             Team homeTeam = new Team("Home");
             Team awayTeam = new Team("Away");
 
-
-            for (int i = 0; i < 11; i++)// Добавляем игроков в команды
+            // Добавляем игроков в команды
+            for (int i = 0; i < 11; i++)
             {
                 homeTeam.AddPlayer(new Player($"HomePlayer{i + 1}"));
                 awayTeam.AddPlayer(new Player($"AwayPlayer{i + 1}"));
             }
 
-
+            // создаем
             Game game = new Game(homeTeam, awayTeam, stadium);
             game.Start();
 
 
-            while (true)// Бесконечный игровой цикл
+            while (true)
             {
+                // Обновляем состояние игры
                 game.Move();
+
                 PrintGameState(game, stadium);
-                System.Threading.Thread.Sleep(500); // Задержка для визуализации
 
+                // Задержка для визуализации
+                System.Threading.Thread.Sleep(500);
 
-                if (Console.KeyAvailable)// Проверка нажатия клавиши для выхода
+                // Проверка нажатия клавиши для выхода
+                if (Console.KeyAvailable)
                 {
                     var key = Console.ReadKey(true);
-                    if (key.Key == ConsoleKey.Escape) // Выход по нажатию ESC
+                    // Выход по нажатию Spacebar
+                    if (key.Key == ConsoleKey.Spacebar) 
                     {
                         break;
                     }
                 }
             }
         }
-
+        // Вывод текущего состояния игры
         static void PrintGameState(Game game, Stadium stadium)
         {
             Console.Clear();
 
             int width = game.Stadium.Width;
             int height = game.Stadium.Height;
-            char[,] field = new char[height, width];
+
+            // Двумерный массив, представляющий игровое поле
+            char[,] field = new char[height, width]; 
 
             // Создаем пустое поле
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    field[y, x] = ' '; // Пустое пространство
+                    field[y, x] = ' ';
                 }
             }
 
@@ -62,9 +70,12 @@
             {
                 int playerX = (int)player.X;
                 int playerY = (int)player.Y;
-                if (stadium.IsIn(playerX, playerY)) // нужен для того чтобы игрок не выходил из поля
+
+                // нужен для того чтобы игрок не выходил из поля
+                if (stadium.IsIn(playerX, playerY)) 
                 {
-                    field[playerY, playerX] = 'H'; // задают символ где находится игрок
+                    // задают символ где находится игрок
+                    field[playerY, playerX] = 'H'; 
                 }
             }
 
@@ -87,33 +98,17 @@
                 field[ballY, ballX] = 'O';
             }
 
-
-            // Отображаем ворота
-            for(int x = 0; x < 8; x++) // пока x меньше 8, он будет работать
-            {
-                field[height / 2 + 3 - x, 0] = 'X'; // Ворота домашней команды
-                field[height / 2 + 3 - x, width - 1] = 'X'; // Ворота выездной команды
-            }
-
-
-            // Выводим счёт
-            Console.WriteLine($"{new string (' ', (int)((float)width /  1.5f))}Score: {game.HomeTeam.Name} {game.HomeTeam.Score} - {game.AwayTeam.Score} {game.AwayTeam.Name}\n");
-            // Преобразование флота в int
-
-            // Выводим поле с рамкой
-            Console.WriteLine(new string('#', width * 2 + 3)); // Верхняя рамка
-
+            // Выводим поле на экран
             for (int y = 0; y < height; y++)
             {
-                Console.Write("# "); // Левая рамка
                 for (int x = 0; x < width; x++)
                 {
-                    Console.Write(field[y, x] + " ");
+                    // Печатаем символы игрового поля
+                    Console.Write(field[y, x]); 
                 }
-                Console.WriteLine("#"); // Правая рамка
+                // Переход на новую строку после каждой строки поля
+                Console.WriteLine(); 
             }
-
-            Console.WriteLine(new string('#', width * 2 + 3)); // Нижняя рамка
         }
     }
 }
