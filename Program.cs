@@ -5,7 +5,7 @@
         // Размер стадиона
         static void Main(string[] args)
         {
-            Stadium stadium = new Stadium(40, 20); 
+            Stadium stadium = new Stadium(70, 20); 
 
             Team homeTeam = new Team("Home");
             Team awayTeam = new Team("Away");
@@ -46,23 +46,50 @@
         }
 
         // Вывод текущего состояния игры
+        // Вывод текущего состояния игры
         static void PrintGameState(Game game, Stadium stadium)
         {
             Console.Clear();
+
+            Console.WriteLine($"Score: Home {game.HomeTeam.Score} - Away {game.AwayTeam.Score}\n");
 
             int width = game.Stadium.Width;
             int height = game.Stadium.Height;
 
             // Двумерный массив, представляющий игровое поле
-            char[,] field = new char[height, width]; 
+            char[,] field = new char[height, width];
 
             // Создаем пустое поле
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    field[y, x] = ' ';
+                    // Устанавливаем рамки поля символом #
+                    if (y == 0 || y == height - 1 || x == 0 || x == width - 1)
+                    {
+                        field[y, x] = '#';
+                    }
+                    else
+                    {
+                        field[y, x] = ' ';
+                    }
                 }
+            }
+
+            // Добавляем ворота (с обеих сторон поля, по центру)
+            int goalHeight = 4; // Высота ворот
+            int goalStart = (height / 2) - (goalHeight / 2);
+
+            // Ворота для домашней команды (слева)
+            for (int y = goalStart; y < goalStart + goalHeight; y++)
+            {
+                field[y, 0] = 'X';
+            }
+
+            // Ворота для выездной команды (справа)
+            for (int y = goalStart; y < goalStart + goalHeight; y++)
+            {
+                field[y, width - 1] = 'X';
             }
 
             // Размещаем игроков домашней команды
@@ -71,11 +98,10 @@
                 int playerX = (int)player.X;
                 int playerY = (int)player.Y;
 
-                // нужен для того чтобы игрок не выходил из поля
-                if (stadium.IsIn(playerX, playerY)) 
+                // Проверяем, чтобы игрок не выходил за пределы поля
+                if (stadium.IsIn(playerX, playerY))
                 {
-                    // задают символ где находится игрок
-                    field[playerY, playerX] = 'H'; 
+                    field[playerY, playerX] = 'H'; // Символ игрока домашней команды
                 }
             }
 
@@ -84,18 +110,20 @@
             {
                 int playerX = (int)player.X;
                 int playerY = (int)player.Y;
+
                 if (stadium.IsIn(playerX, playerY))
                 {
-                    field[playerY, playerX] = 'A';
+                    field[playerY, playerX] = 'A'; // Символ игрока выездной команды
                 }
             }
 
             // Размещаем мяч
             int ballX = (int)game.Ball.X;
             int ballY = (int)game.Ball.Y;
-            if (stadium.IsIn(ballX, ballY)) 
+
+            if (stadium.IsIn(ballX, ballY))
             {
-                field[ballY, ballX] = 'O';
+                field[ballY, ballX] = 'O'; // Символ мяча
             }
 
             // Выводим поле на экран
@@ -104,10 +132,10 @@
                 for (int x = 0; x < width; x++)
                 {
                     // Печатаем символы игрового поля
-                    Console.Write(field[y, x]); 
+                    Console.Write(field[y, x]);
                 }
                 // Переход на новую строку после каждой строки поля
-                Console.WriteLine(); 
+                Console.WriteLine();
             }
         }
     }
